@@ -7,8 +7,8 @@
     left: 0;
     right: 0;
   }
-  * {
-    overflow: hidden;
+  textarea {
+    width: 100%;
   }
   .invisible {
     opacity: 0;
@@ -116,6 +116,11 @@
       <div id="clamp-status"><button id="clamp-button" href="#">unclamp</button></div>
     </div>
     <div id="file-preview-wrapper"></div>
-    <div id="source-comments"></div>
+    <div id="source-comments">
+    </div>
+    <div id="source-add-comment">
+      <textarea id="source-add-comment-input" placeholder="source" rows="1"></textarea>
+      <button id="source-add-comment-submit">Submit</button>
+    </div>
   </div>
 </div>
