@@ -1,18 +1,30 @@
 var notShown = true, filePreviewWrapper, currentClampState = true;
 function loadFile(file) {
-  if(supportedImage(file))
+  if(supportedImage(file)) {
     loadImage(file);
-  else if(file.type === "video/webm")
+  }
+  else if(file.type === "video/webm") {
     loadWebm(file);
-  else
-    return;
+  }
+  else {
+    hideWrapper();
+  }
   var reader = new FileReader();
   reader.onload = function(e) {
     var hash = CryptoJS.SHA3(this.result).toString();
-    console.log("loaded", hash, file.name);
     sendQueryPacket(hash, file.name);
   }
   reader.readAsText(file);
+}
+
+function hideWrapper() {
+  if(filePreviewWrapper)
+    filePreviewWrapper.style.display = "none";
+}
+
+function showWrapper() {
+  if(filePreviewWrapper)
+    filePreviewWrapper.style.display = "";
 }
 
 function loadImage(file) {
@@ -25,6 +37,7 @@ function loadImage(file) {
     img.classList.add("clamped");
     setClampedState(true);
     filePreviewWrapper.appendChild(img);
+    showWrapper();
   }
   reader.readAsDataURL(file);
 }
@@ -56,6 +69,7 @@ function loadWebm(file) {
     video.controls = "controls";
     video.src = this.result;
     filePreviewWrapper.appendChild(video);
+    showWrapper();
   }
   reader.readAsDataURL(file);
 }
@@ -102,6 +116,7 @@ function sendQueryPacket(hash, name) {
       return buildSource(response, name);
     } catch(e) {
       console.log(e);
+      alert("Could not decode the response");
       throw new Error("Could not decode the response");
     }
   }
@@ -114,9 +129,12 @@ function buildSource(source, name) {
     document.querySelector(".invisible").classList.remove("invisible");
     notShown = false;
   }
+  var namesEl = document.getElementById("names");
+  if(!source.names || source.names.length == 0)
+    namesEl.innerHTML = "No Known Names";
   document.getElementById("source-id").innerHTML = "HASH: " +source.id.replace("<", "&lt;").replace(">", "&gt;");
   document.getElementById("source-name").innerHTML = "NAME: " + name;
-  var commentWrapper = document.getElementById("source-comments");
+  var commentWrapper = document.getElementById("source-comments")
   commentWrapper.innerHTML = "No Sources";
   for(var i = 0; i < source.sources.length; i++) {
     var el = document.createElement("div");
