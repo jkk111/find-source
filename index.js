@@ -33,9 +33,36 @@ app.post("/source/add", function(req, res) {
   }
 });
 
+app.post("/source/link", function(req, res) {
+  var first = req.body.first;
+  var second = req.body.second;
+  if(first && second && exists(first, second)) {
+    sources[first].links.push(second);
+    if(sources[first].indexOf(req.ip) == -1)
+      sources[first].ips.push(req.ip);
+    sources[second].links.push(first);
+    if(sources[second].indexOf(req.ip) == -1)
+      sources[second].ips.push(req.ip);
+  } else {
+    if(first && second)
+      res.status(404).send("Source not found");
+    else {
+      res.status(400).send("Invalid request");
+    }
+  }
+})
+
+function exists() {
+  for(var i = 0 ; i < arguments.length; i++) {
+    if(!sources[arguments[i]]) return false;
+  }
+  return true;
+}
+
+// Checks if a source exists
 function checkSrc(srcId, ip, name) {
   if(!sources[srcId])
-    sources[srcId] = { timesChecked: 0, id: srcId, added: ((new Date()).getTime()), ips: [], sources: [], names: [] }
+    sources[srcId] = { timesChecked: 0, id: srcId, added: ((new Date()).getTime()), ips: [], sources: [], names: [], links: [] }
   if(ip && sources[srcId].ips.indexOf(ip) == -1)
     sources[srcId].ips.push(ip);
   console.log(sources[srcId])
@@ -59,6 +86,7 @@ function loadSources() {
 
 module.exports = app;
 
+// Only sends necessary data, strips source ips.
 function sanitize(obj) {
   var sanitized = {};
   sanitized.id = obj.id;
